@@ -242,7 +242,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 for i in range(3000):
     st, res, moves = playGame()
-    # print(st, res)
+    train(st, res)
     # print(movesToGame(moves))
     print("Partida:", i)
 
