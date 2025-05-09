@@ -232,8 +232,6 @@ def playGame(playerStart = None) -> tuple[torch.Tensor, int, list[str]]:
     return torch.tensor(states, dtype=torch.float32), mt.board.winner(), moves
 
 
-playGame()
-
 # NeuralNetwork.load("modelWeights")
 
 def signal_handler(sig, frame):
@@ -245,7 +243,7 @@ signal.signal(signal.SIGINT, signal_handler)
 for i in range(3000):
     st, res, moves = playGame()
     # print(st, res)
-    print(movesToGame(moves))
+    # print(movesToGame(moves))
     print("Partida:", i)
 
 NeuralNetwork.save("modelWeights")
