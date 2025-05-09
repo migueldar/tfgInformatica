@@ -6,25 +6,15 @@ class BackgammonNN(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.layer1 = nn.Linear(29, 15, False)
-        self.layer2 = nn.Linear(15, 15, False)
-        self.layer3 = nn.Linear(15, 15, False)
-        self.layer4 = nn.Linear(15, 15, False)
-        self.layer5 = nn.Linear(15, 15, False)
-        self.layer6 = nn.Linear(15, 15, False)
-        self.layer7 = nn.Linear(15, 15, False)
-        self.layer8 = nn.Linear(15, 15, False)
-        self.layerOut = nn.Linear(15, 1, False)
+        self.layer1 = nn.Linear(29, 128)
+        self.layer2 = nn.Linear(128, 128)
+        self.layer3 = nn.Linear(128, 64)
+        self.layerOut = nn.Linear(64, 1)
 
     def forward(self, x: Tensor) -> Tensor:
         x = torch.tanh(self.layer1(x))
         x = torch.tanh(self.layer2(x))
         x = torch.tanh(self.layer3(x))
-        x = torch.tanh(self.layer4(x))
-        x = torch.tanh(self.layer5(x))
-        x = torch.tanh(self.layer6(x))
-        x = torch.tanh(self.layer7(x))
-        x = torch.tanh(self.layer8(x))
         x = torch.tanh(self.layerOut(x))
         return x
     
@@ -45,10 +35,6 @@ class BackgammonNN(nn.Module):
 
 
 NeuralNetwork: BackgammonNN = BackgammonNN()
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(device)
-NeuralNetwork.to(device)
 
 optimizer = torch.optim.Adam(NeuralNetwork.parameters(), lr=1e-3)
 

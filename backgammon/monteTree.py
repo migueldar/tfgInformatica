@@ -1,6 +1,6 @@
 from board import BackgammonBoard
 from neuralNetwork import NeuralNetwork, train
-from board import rollDices
+from board import rollDices, dicesToStr, movesToGame
 import torch
 import math
 import random
@@ -197,18 +197,25 @@ class MonteTree:
             selected.backup(simVal)
         return self.actionSelection()
 
-
-def playGame(playerStart = None) -> tuple[torch.Tensor, int]:
+def playGame(playerStart = None) -> tuple[torch.Tensor, int, list[str]]:
     if playerStart == None:
         playerStart = random.choice([1,-1])
 
     states = []
+    moves = []
     mt = MonteTree(None, BackgammonBoard(), True)
 
     w = 0
     while not mt.board.isOver():
+        # if w % 10 == 0:
+        # print(w)
         w += 1
+
+        moves.append(f"{dicesToStr(mt.board.dices)}: ")
+
         mt = mt.playTurn()
+        moves[-1] += f"{mt.board.moveStr}"
+    
         states.append(mt.board.toArray())
         if mt.board.isOver():
             break
@@ -222,8 +229,10 @@ def playGame(playerStart = None) -> tuple[torch.Tensor, int]:
             mt = MonteTree(None, mt.board, True)
 
     print("Turnos:", w)
-    return torch.tensor(states, dtype=torch.float32), mt.board.winner()
+    return torch.tensor(states, dtype=torch.float32), mt.board.winner(), moves
 
+
+playGame()
 
 # NeuralNetwork.load("modelWeights")
 
@@ -233,9 +242,10 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-for i in range(1000):
-    st, res = playGame()
-    train(st, res)
+for i in range(3000):
+    st, res, moves = playGame()
+    # print(st, res)
+    print(movesToGame(moves))
     print("Partida:", i)
 
 NeuralNetwork.save("modelWeights")

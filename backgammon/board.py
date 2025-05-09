@@ -11,6 +11,25 @@ def rollDices() -> list[int]:
         dices = [dices[0]] * 4
     return dices
 
+def dicesToStr(dices) -> str:
+    if dices[0] == dices[1]:
+        return f"{dices[0]}{dices[0]}"
+    if dices[0] > dices[1]:
+        return f"{dices[0]}{dices[1]}"
+    return f"{dices[1]}{dices[0]}"
+
+def movesToGame(moves: list[str]) -> str:
+    ret =  "1 point match\n\n"
+    ret += "Game 1\n"
+    ret += "ai1:0 ai2:0\n"
+
+    for i in range(len(moves) // 2):
+        ret += f"{i+1}) {moves[i * 2]} {moves[i * 2 + 1]}\n"
+    if len(moves) % 2 == 1:
+        ret += f"{len(moves) // 2 + 1}) {moves[-1]}\n"
+    return ret
+
+
 class BackgammonBoard:
     def __init__(self, points = [-2, 0, 0, 0, 0, 5, 0, 3, 0, 0, 0, -5, 5, 0, 0, 0, -3, 0, -5, 0, 0, 0, 0, 2],
                  bar = [0,0], bearoff = [0,0], dices = None, player = None):
@@ -27,10 +46,11 @@ class BackgammonBoard:
             self.player = player
         else:
             self.player = 1 if self.dices[0] > self.dices[1] else -1
+        self.moveStr = ""
 
     def __repr__(self):
         return f"\nP:\t{self.points[0:6]}\n\t{self.points[6:12]}\n\t{self.points[12:18]}\n\t{self.points[18:24]}\n" + \
-                f"Bar: {self.bar}\nBearoff: {self.bearoff}\nDices: {self.dices}\nTurn: {self.player}"
+                f"Bar: {self.bar}\nBearoff: {self.bearoff}\nDices: {self.dices}\nTurn: {self.player}\nMoveStr: {self.moveStr}"
 
     def copy(self):
         return BackgammonBoard(self.points.copy(), self.bar.copy(), self.bearoff.copy(), self.dices.copy(), self.player)
@@ -63,16 +83,16 @@ class BackgammonBoard:
 
         ret: set["BackgammonBoard"] = set()
         if len(self.dices) == 2:
-            validMoves1 = BackgammonBoard.validMoves(self, self.dices[0])
+            validMoves1 = BackgammonBoard.validMoves(self, self.dices[0], True)
             if validMoves1:
                 for v in validMoves1:
-                    validMoves2 = BackgammonBoard.validMoves(v, self.dices[1])
+                    validMoves2 = BackgammonBoard.validMoves(v, self.dices[1], False)
                     if validMoves2:
                         ret.update(validMoves2)
-            validMoves3 = BackgammonBoard.validMoves(self, self.dices[1])
+            validMoves3 = BackgammonBoard.validMoves(self, self.dices[1], True)
             if validMoves3:
                 for v in validMoves3:
-                    validMoves4 = BackgammonBoard.validMoves(v, self.dices[0])
+                    validMoves4 = BackgammonBoard.validMoves(v, self.dices[0], False)
                     if validMoves4:
                         ret.update(validMoves4)
             if not ret:
@@ -80,16 +100,16 @@ class BackgammonBoard:
                 ret.update(validMoves3)
 
         if len(self.dices) == 4:
-            validMoves1 = BackgammonBoard.validMoves(self, self.dices[0])
+            validMoves1 = BackgammonBoard.validMoves(self, self.dices[0], True)
             if validMoves1:
                 for v1 in validMoves1:
-                    validMoves2 = BackgammonBoard.validMoves(v1, self.dices[0])
+                    validMoves2 = BackgammonBoard.validMoves(v1, self.dices[0], False)
                     if validMoves2:
                         for v2 in validMoves2:
-                            validMoves3 = BackgammonBoard.validMoves(v2, self.dices[0])
+                            validMoves3 = BackgammonBoard.validMoves(v2, self.dices[0], False)
                             if validMoves3:
                                 for v3 in validMoves3:
-                                    validMoves4 = BackgammonBoard.validMoves(v3, self.dices[0])
+                                    validMoves4 = BackgammonBoard.validMoves(v3, self.dices[0], False)
                                     if validMoves4:
                                         ret.update(validMoves4)
                                     else:
@@ -108,15 +128,20 @@ class BackgammonBoard:
         return list(ret)
 
     @staticmethod
-    def validMoves(game: "BackgammonBoard", die: int) -> list["BackgammonBoard"]:
+    def validMoves(game: "BackgammonBoard", die: int, isFirst: bool) -> list["BackgammonBoard"]:
         if game.player == 1:
             if game.bar[0] > 0:
                 if game.points[-die] >= -1:
                     gameCp = game.copy()
                     gameCp.bar[0] -= 1
+                        
+                    gameCp.moveStr = f"25/{25 - die}" if isFirst else f"{game.moveStr} 25/{25 - die}"
+
                     if game.points[-die] == -1:
                         gameCp.points[-die] = 1
                         gameCp.bar[1] += 1
+
+                        gameCp.moveStr += "*"
                     else:
                         gameCp.points[-die] += 1
                     return [gameCp]
@@ -132,9 +157,14 @@ class BackgammonBoard:
                 if i - die >= 0 and game.points[i - die] >= -1:
                     gameCp = game.copy()
                     gameCp.points[i] -= 1
+
+                    gameCp.moveStr = f"{i + 1}/{i + 1 - die}" if isFirst else f"{game.moveStr} {i + 1}/{i + 1 - die}"
+
                     if game.points[i - die] == -1:
                         gameCp.points[i - die] = 1
                         gameCp.bar[1] += 1
+
+                        gameCp.moveStr += "*"
                     else:
                         gameCp.points[i - die] += 1
                     ret.append(gameCp)
@@ -142,6 +172,9 @@ class BackgammonBoard:
                     gameCp = game.copy()
                     gameCp.points[i] -= 1
                     gameCp.bearoff[0] += 1
+
+                    gameCp.moveStr = f"{i + 1}/0" if isFirst else f"{game.moveStr} {i + 1}/0"
+
                     ret.append(gameCp)
 
         else:
@@ -149,9 +182,14 @@ class BackgammonBoard:
                 if game.points[die - 1] <= 1:
                     gameCp = game.copy()
                     gameCp.bar[1] -= 1
+
+                    gameCp.moveStr = f"25/{25 - die}" if isFirst else f"{game.moveStr} 25/{25 - die}"
+
                     if game.points[die - 1] == 1:
                         gameCp.points[die - 1] = -1
                         gameCp.bar[0] += 1
+
+                        gameCp.moveStr += "*"
                     else:
                         gameCp.points[die - 1] -= 1
                     return [gameCp]
@@ -168,9 +206,14 @@ class BackgammonBoard:
                 if i + die < 24 and game.points[i + die] <= 1:
                     gameCp = game.copy()
                     gameCp.points[i] += 1
+
+                    gameCp.moveStr = f"{24 - i}/{24 - i - die}" if isFirst else f"{game.moveStr} {24 - i}/{24 - i - die}"
+                
                     if game.points[i + die] == 1:
                         gameCp.points[i + die] = -1
                         gameCp.bar[0] += 1
+
+                        gameCp.moveStr += "*"
                     else:
                         gameCp.points[i + die] -= 1
                     ret.append(gameCp)
@@ -178,6 +221,9 @@ class BackgammonBoard:
                     gameCp = game.copy()
                     gameCp.points[i] += 1
                     gameCp.bearoff[1] += 1
+
+                    gameCp.moveStr = f"{24 - i}/0" if isFirst else f"{game.moveStr} {24 - i}/0"
+
                     ret.append(gameCp)
         return ret
 
@@ -217,6 +263,10 @@ class BackgammonBoard:
 #     print(i, ":", game.diff(moves[i]))
 # move = int(input("Move: "))
 # game.playMove(move)
+
+# board = BackgammonBoard()
+
+# print(board.calculatePossibleMoves())
 
 # for i in range(100):
 #     while game.winner() == 0:
