@@ -56,8 +56,8 @@ class DiceArista:
 
 #los nodos hoja siempre tienen hasDices a False
 class MonteTree:
-    maxTurnsSimulation = 1
-    simulationsPerTurn = 1
+    maxTurnsSimulation = 8
+    simulationsPerTurn = 100
     # mu = 10e5
     mu = 1
     alpha = 4
