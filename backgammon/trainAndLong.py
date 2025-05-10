@@ -250,8 +250,10 @@ while True:
     while not Path(LOGDONEFILE).exists():
         time.sleep(2)
     os.remove(LOGDONEFILE)
-    os.remove(FILEPARTIDALARGA)
-    os.remove(DONEPARTIDALARGA)
+    if Path(FILEPARTIDALARGA).exists():
+        os.remove(FILEPARTIDALARGA)
+    if Path(DONEPARTIDALARGA).exists():
+        os.remove(DONEPARTIDALARGA)
 
     games = []
     for i in range(1,5):
