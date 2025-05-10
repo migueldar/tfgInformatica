@@ -275,7 +275,7 @@ while True:
 
 
     for g in games:
-        train(g[0], g[1])
+        train(torch.tensor(g[0], dtype=torch.float32), g[1])
     NeuralNetwork.save(WEIGHTSFILE)
     open(DONEWEIGHTS, "w").close()
 
