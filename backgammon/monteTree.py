@@ -224,7 +224,7 @@ def playGame(playerStart = None) -> tuple[list[list[int]], int]:
             mt.board.dices = newDices
             mt = MonteTree(None, mt.board, True)
 
-    # print("Turnos:", w)
+    print("Turnos:", w)
     return states, mt.board.winner()
 
 
@@ -233,9 +233,9 @@ NeuralNetwork.load("modelWeights")
 for i in range(3000):
     st, res = playGame()
 
-    print(res)
-    print(st)
-    print()
-    # print("Partida:", i)
+    # print(res)
+    # print(st)
+    # print()
+    print("Partida:", i)
 
 NeuralNetwork.save("modelWeights")
