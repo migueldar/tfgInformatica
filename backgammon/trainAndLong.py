@@ -60,8 +60,8 @@ class DiceArista:
 
 #los nodos hoja siempre tienen hasDices a False
 class MonteTree:
-    maxTurnsSimulation = 16
-    simulationsPerTurn = 400
+    maxTurnsSimulation = 20
+    simulationsPerTurn = 500
     mu = 10e5
     alpha = 4
     # mu = 1
@@ -279,7 +279,7 @@ while True:
     NeuralNetwork.save(WEIGHTSFILE)
     open(DONEWEIGHTS, "w").close()
 
-    _, _, moves = playGame()
+    moves = playGame()
     fp = open(FILEPARTIDALARGA, "w")
     fp.write(movesToGame(moves))
     fp.close()
