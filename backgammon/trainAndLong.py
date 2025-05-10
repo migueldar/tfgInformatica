@@ -56,11 +56,11 @@ class DiceArista:
 
 #los nodos hoja siempre tienen hasDices a False
 class MonteTree:
-    maxTurnsSimulation = 1
-    simulationsPerTurn = 1
-    # mu = 10e5
-    mu = 1
+    maxTurnsSimulation = 16
+    simulationsPerTurn = 400
+    mu = 10e5
     alpha = 4
+    # mu = 1
 
     def __init__(self, parent: "MonteTree", board: BackgammonBoard, hasDices: bool):
         self.board: BackgammonBoard = board
@@ -197,22 +197,24 @@ class MonteTree:
             selected.backup(simVal)
         return self.actionSelection()
 
-def playGame(playerStart = None) -> tuple[list[list[int]], int]:
+def playGame(playerStart = None) -> list[str]:
     if playerStart == None:
         playerStart = random.choice([1,-1])
 
-    states = []
+    moves = []
     mt = MonteTree(None, BackgammonBoard(), True)
 
     w = 0
     while not mt.board.isOver():
         # if w % 10 == 0:
-        # print(w)
+        print(w)
         w += 1
 
+        moves.append(f"{dicesToStr(mt.board.dices)}: ")
+
         mt = mt.playTurn()
+        moves[-1] += f"{mt.board.moveStr}"
     
-        states.append(mt.board.toArray())
         if mt.board.isOver():
             break
         newDices = rollDices()
@@ -224,18 +226,19 @@ def playGame(playerStart = None) -> tuple[list[list[int]], int]:
             mt.board.dices = newDices
             mt = MonteTree(None, mt.board, True)
 
-    # print("Turnos:", w)
-    return states, mt.board.winner()
+    print("Turnos:", w)
+    return moves
 
 
 NeuralNetwork.load("modelWeights")
 
-for i in range(3000):
-    st, res = playGame()
+#input knoledge
+games = []
 
-    print(res)
-    print(st)
-    print()
-    # print("Partida:", i)
+for g in games:
+    train(g[0], g[1])
+
+_, _, moves = playGame()
+print(moves)
 
 NeuralNetwork.save("modelWeights")

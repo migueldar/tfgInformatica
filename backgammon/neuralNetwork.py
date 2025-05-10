@@ -12,10 +12,10 @@ class BackgammonNN(nn.Module):
         self.layerOut = nn.Linear(64, 1)
 
     def forward(self, x: Tensor) -> Tensor:
-        x = torch.relu(self.layer1(x))
-        x = torch.relu(self.layer2(x))
-        x = torch.relu(self.layer3(x))
-        x = torch.relu(self.layerOut(x))
+        x = torch.tanh(self.layer1(x))
+        x = torch.tanh(self.layer2(x))
+        x = torch.tanh(self.layer3(x))
+        x = torch.tanh(self.layerOut(x))
         return x
     
     def loss_fn(preds: Tensor, result: int) -> Tensor:
