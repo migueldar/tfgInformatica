@@ -237,7 +237,7 @@ def playGame(playerStart = None) -> list[str]:
 WEIGHTSFILE = "modelWeights"
 LOGDONEFILE = "/root/done/doneLogs"
 GAMESDIR = "/root/logGames/"
-FILEPARTIDALARGA = "/root/tfgInfo/backgammon/partida"
+FILEPARTIDALARGA = "/root/tfgInformatica/backgammon/partida"
 DONEPARTIDALARGA= "/root/done/donePartidaLarga"
 DONEWEIGHTS = "/root/done/doneModelWeights"
 
