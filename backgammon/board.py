@@ -168,7 +168,7 @@ class BackgammonBoard:
                     else:
                         gameCp.points[i - die] += 1
                     ret.append(gameCp)
-                elif isBearing and (i - die == -1 or (i == hasPiece[len(hasPiece) - 1] and not ret)):
+                elif isBearing and (i - die == -1 or (i - die < -1 and i == hasPiece[len(hasPiece) - 1] and not ret)):
                     gameCp = game.copy()
                     gameCp.points[i] -= 1
                     gameCp.bearoff[0] += 1
@@ -217,7 +217,7 @@ class BackgammonBoard:
                     else:
                         gameCp.points[i + die] -= 1
                     ret.append(gameCp)
-                elif isBearing and (i + die == 24 or (i == hasPiece[len(hasPiece) - 1] and not ret)):
+                elif isBearing and (i + die == 24 or (i - die > 24 and i == hasPiece[len(hasPiece) - 1] and not ret)):
                     gameCp = game.copy()
                     gameCp.points[i] += 1
                     gameCp.bearoff[1] += 1
