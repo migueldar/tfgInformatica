@@ -6,6 +6,10 @@ import math
 import random
 import time
 import signal
+import sys
+from pathlib import Path
+import os
+
 
 calculatePossibleMovesTime = 0
 elseTime = 0
@@ -227,15 +231,32 @@ def playGame(playerStart = None) -> tuple[list[list[int]], int]:
     print("Turnos:", w)
     return states, mt.board.winner()
 
+if len(sys.argv) != 6:
+    raise RuntimeError("argv must have length 6")
 
-NeuralNetwork.load("modelWeights")
+LOGFILE = sys.argv[3]
+WEIGHTSDONEFILE = sys.argv[5]
+WEIGHTSFILE = sys.argv[4]
 
-for i in range(3000):
+if Path(WEIGHTSFILE).exists():
+    print("loading weights")
+    NeuralNetwork.load(WEIGHTSFILE)
+logF = open(LOGFILE, "w")
+
+i = 0
+while True:
     st, res = playGame()
 
-    # print(res)
-    # print(st)
-    # print()
+    logF.write(f"{res}\n")
+    logF.write(f"{st}\n\n")
+
+    i += 1
     print("Partida:", i)
 
-NeuralNetwork.save("modelWeights")
+    if Path(WEIGHTSDONEFILE).exists():
+        print("Loading weights and cleaning gameLog")
+        NeuralNetwork.load(WEIGHTSFILE)
+        os.remove(LOGFILE)
+        os.remove(WEIGHTSFILE)
+        os.remove(WEIGHTSDONEFILE)
+        logF = open(LOGFILE, "w")

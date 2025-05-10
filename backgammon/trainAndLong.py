@@ -6,6 +6,10 @@ import math
 import random
 import time
 import signal
+import sys
+from pathlib import Path
+import os
+import ast
 
 calculatePossibleMovesTime = 0
 elseTime = 0
@@ -230,15 +234,52 @@ def playGame(playerStart = None) -> list[str]:
     return moves
 
 
-NeuralNetwork.load("modelWeights")
+WEIGHTSFILE = "modelWeights"
+LOGDONEFILE = "/root/done/doneLogs"
+GAMESDIR = "/root/logGames/"
+FILEPARTIDALARGA = "/root/tfgInfo/backgammon/partida"
+DONEPARTIDALARGA= "/root/done/donePartidaLarga"
+DONEWEIGHTS = "/root/done/doneModelWeights"
 
-#input knoledge
-games = []
 
-for g in games:
-    train(g[0], g[1])
+if Path(WEIGHTSFILE).exists():
+    print("loading weights")
+    NeuralNetwork.load(WEIGHTSFILE)
 
-_, _, moves = playGame()
-print(moves)
+while True:
+    while not Path(LOGDONEFILE).exists():
+        time.sleep(2)
+    os.remove(LOGDONEFILE)
+    os.remove(FILEPARTIDALARGA)
+    os.remove(DONEPARTIDALARGA)
 
-NeuralNetwork.save("modelWeights")
+    games = []
+    for i in range(1,5):
+        fg = open(f"/root/logGames/log{i}", "r")
+
+        line = "\n"
+        win = None
+        states = None
+        while line != "":
+            for i in range(3):
+                line = fg.readline()
+                if line == "":
+                    break
+                if i == 0:
+                    win = int(line.removesuffix("\n"))
+                elif i == 1:
+                    states = ast.literal_eval(line.removesuffix("\n"))
+                    games.append([states, win])
+
+
+    for g in games:
+        train(g[0], g[1])
+    NeuralNetwork.save(WEIGHTSFILE)
+    open(DONEWEIGHTS, "w").close()
+
+    _, _, moves = playGame()
+    fp = open(FILEPARTIDALARGA, "w")
+    fp.write(movesToGame(moves))
+    fp.close()
+    open(DONEPARTIDALARGA, "w").close()
+   
