@@ -6,15 +6,19 @@ class BackgammonNN(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.layer1 = nn.Linear(29, 64)
-        self.layer2 = nn.Linear(64, 64)
+        self.layer1 = nn.Linear(29, 128)
+        self.layer2 = nn.Linear(128, 64)
         self.layer3 = nn.Linear(64, 64)
+        self.layer4 = nn.Linear(64, 64)
+        self.layer5 = nn.Linear(64, 64)
         self.layerOut = nn.Linear(64, 1)
 
     def forward(self, x: Tensor) -> Tensor:
         x = torch.tanh(self.layer1(x))
         x = torch.tanh(self.layer2(x))
         x = torch.tanh(self.layer3(x))
+        x = torch.tanh(self.layer4(x))
+        x = torch.tanh(self.layer5(x))
         x = torch.tanh(self.layerOut(x))
         return x
     

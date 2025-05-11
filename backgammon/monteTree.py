@@ -241,6 +241,9 @@ WEIGHTSFILE = sys.argv[4]
 if Path(WEIGHTSFILE).exists():
     print("loading weights")
     NeuralNetwork.load(WEIGHTSFILE)
+    NeuralNetworkQuant = torch.quantization.quantize_dynamic(
+        NeuralNetwork, {torch.nn.Linear}, dtype=torch.qint8
+    )
 logF = open(LOGFILE, "w")
 
 i = 0
@@ -256,6 +259,9 @@ while True:
     if Path(WEIGHTSDONEFILE).exists():
         print("Loading weights and cleaning gameLog")
         NeuralNetwork.load(WEIGHTSFILE)
+        NeuralNetworkQuant = torch.quantization.quantize_dynamic(
+            NeuralNetwork, {torch.nn.Linear}, dtype=torch.qint8
+        )
         os.remove(LOGFILE)
         os.remove(WEIGHTSFILE)
         os.remove(WEIGHTSDONEFILE)
