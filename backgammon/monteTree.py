@@ -60,10 +60,10 @@ class DiceArista:
 
 #los nodos hoja siempre tienen hasDices a False
 class MonteTree:
-    maxTurnsSimulation = 20
-    simulationsPerTurn = 500
-    mu = 10e5
-    # mu = 1
+    maxTurnsSimulation = 8
+    simulationsPerTurn = 100
+    # mu = 10e5
+    mu = 1
     alpha = 4
 
     def __init__(self, parent: "MonteTree", board: BackgammonBoard, hasDices: bool):
@@ -132,7 +132,7 @@ class MonteTree:
 
 
     #añade aristas e hijos, siempre se llama desde un nodo con hasDices = True
-    def expansion(self, mul = 1, printtt = False):
+    def expansion(self, mul = 1):
         possibleMoves = self.board.calculatePossibleMoves()
         with torch.no_grad():
             possibleMovesArray = [p.toArray() for p in possibleMoves]
@@ -140,8 +140,6 @@ class MonteTree:
                 self.children.append(MonteTree(self, p, False))
             #aqui multiplico por el jugador porque si es -1 los valores mejores son los mas negativos
             possibleMovesValuesT = NeuralNetwork(torch.tensor(possibleMovesArray, dtype=torch.float32)).squeeze(1) * mul * self.board.player
-            if printtt:
-                print(possibleMovesValuesT)
             possibleMovesValuesSoft = possibleMovesValuesT.softmax(-1)
             for p in possibleMovesValuesSoft.tolist():
                 self.aristas.append(Arista(p))
@@ -186,18 +184,17 @@ class MonteTree:
         qsT = torch.tensor(qs) * self.board.player
         qsSoft = qsT.softmax(-1)
 
-        Arista.printAristas(self.aristas)
-        for c in self.children:
-            print(c.board.points)
+        # Arista.printAristas(self.aristas)
+        # print([f"{x:.3f}" for x in qs])
+        # print(qsSoft)
 
         return chooseWithProbabilities(self.children, qsSoft)
 
 
     def playTurn(self) -> "MonteTree":
-        for i in range(MonteTree.simulationsPerTurn):
+        for _ in range(MonteTree.simulationsPerTurn):
             selected = self.nodeSelection()
-            if i == 0:
-                selected.expansion(mul = 7, printtt=True)
+            selected.expansion()
             if len(selected.children) != 0:
                 selected = selected.nodeSelection()
             simVal = selected.simulation()
@@ -234,43 +231,32 @@ def playGame(playerStart = None) -> tuple[list[list[int]], int]:
     print("Turnos:", w)
     return states, mt.board.winner()
 
+if len(sys.argv) != 6:
+    raise RuntimeError("argv must have length 6")
 
-NeuralNetwork.load("modelWeights")
+LOGFILE = sys.argv[3]
+WEIGHTSDONEFILE = sys.argv[5]
+WEIGHTSFILE = sys.argv[4]
 
-MonteTree(None, BackgammonBoard(
-                [5, 5, -2, -3, 5, 0,
-                 0, 0, 0, -2, 0, 0,
-                 0, 0, 0, 0, 0, 0,
-                 0, -2, 0,-6, 0, 0,], [0,0], [0, 0], [5,4], -1), True).playTurn()
+if Path(WEIGHTSFILE).exists():
+    print("loading weights")
+    NeuralNetwork.load(WEIGHTSFILE)
+logF = open(LOGFILE, "w")
 
+i = 0
+while True:
+    st, res = playGame()
 
+    logF.write(f"{res}\n")
+    logF.write(f"{st}\n\n")
 
-# if len(sys.argv) != 6:
-#     raise RuntimeError("argv must have length 6")
+    i += 1
+    print("Partida:", i)
 
-# LOGFILE = sys.argv[3]
-# WEIGHTSDONEFILE = sys.argv[5]
-# WEIGHTSFILE = sys.argv[4]
-
-# if Path(WEIGHTSFILE).exists():
-#     print("loading weights")
-#     NeuralNetwork.load(WEIGHTSFILE)
-# logF = open(LOGFILE, "w")
-
-# i = 0
-# while True:
-#     st, res = playGame()
-
-#     logF.write(f"{res}\n")
-#     logF.write(f"{st}\n\n")
-
-#     i += 1
-#     print("Partida:", i)
-
-#     if Path(WEIGHTSDONEFILE).exists():
-#         print("Loading weights and cleaning gameLog")
-#         NeuralNetwork.load(WEIGHTSFILE)
-#         os.remove(LOGFILE)
-#         os.remove(WEIGHTSFILE)
-#         os.remove(WEIGHTSDONEFILE)
-#         logF = open(LOGFILE, "w")
+    if Path(WEIGHTSDONEFILE).exists():
+        print("Loading weights and cleaning gameLog")
+        NeuralNetwork.load(WEIGHTSFILE)
+        os.remove(LOGFILE)
+        os.remove(WEIGHTSFILE)
+        os.remove(WEIGHTSDONEFILE)
+        logF = open(LOGFILE, "w")
