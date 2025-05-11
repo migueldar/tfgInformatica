@@ -138,6 +138,7 @@ class MonteTree:
             possibleMovesArray = [p.toArray() for p in possibleMoves]
             for p in possibleMoves:
                 self.children.append(MonteTree(self, p, False))
+            global NeuralNetworkQuant
             #aqui multiplico por el jugador porque si es -1 los valores mejores son los mas negativos
             possibleMovesValuesT = NeuralNetworkQuant(torch.tensor(possibleMovesArray, dtype=torch.float32)).squeeze(1) * mul * self.board.player
             possibleMovesValuesSoft = possibleMovesValuesT.softmax(-1)
@@ -163,6 +164,7 @@ class MonteTree:
         if simTree.board.isOver():
             return simTree.board.winner()
         with torch.no_grad():
+            global NeuralNetworkQuant
             return NeuralNetworkQuant(simTree.board.toTensor()).item()
         
 
