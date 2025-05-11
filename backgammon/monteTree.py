@@ -243,9 +243,10 @@ WEIGHTSFILE = sys.argv[4]
 if Path(WEIGHTSFILE).exists():
     print("loading weights")
     NeuralNetwork.load(WEIGHTSFILE)
-    NeuralNetworkQuant = torch.quantization.quantize_dynamic(
-        NeuralNetwork, {torch.nn.Linear}, dtype=torch.qint8
-    )
+NeuralNetworkQuant = torch.quantization.quantize_dynamic(
+    NeuralNetwork, {torch.nn.Linear}, dtype=torch.qint8
+)
+
 logF = open(LOGFILE, "w")
 
 i = 0
