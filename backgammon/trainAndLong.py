@@ -192,9 +192,11 @@ class MonteTree:
 
 
     def playTurn(self) -> "MonteTree":
-        for _ in range(MonteTree.simulationsPerTurn):
+        for i in range(MonteTree.simulationsPerTurn):
             selected = self.nodeSelection()
             selected.expansion()
+            if i == 0:
+                selected.expansion(mul = 8, printtt=True)
             if len(selected.children) != 0:
                 selected = selected.nodeSelection()
             simVal = selected.simulation()
@@ -246,42 +248,42 @@ if Path(WEIGHTSFILE).exists():
     print("loading weights")
     NeuralNetwork.load(WEIGHTSFILE)
 
-while True:
-    while not Path(LOGDONEFILE).exists():
-        time.sleep(2)
-    os.remove(LOGDONEFILE)
-    if Path(FILEPARTIDALARGA).exists():
-        os.remove(FILEPARTIDALARGA)
-    if Path(DONEPARTIDALARGA).exists():
-        os.remove(DONEPARTIDALARGA)
+for i in range(10):
+    # while not Path(LOGDONEFILE).exists():
+    #     time.sleep(2)
+    # os.remove(LOGDONEFILE)
+    # if Path(FILEPARTIDALARGA).exists():
+    #     os.remove(FILEPARTIDALARGA)
+    # if Path(DONEPARTIDALARGA).exists():
+    #     os.remove(DONEPARTIDALARGA)
 
-    games = []
-    for i in range(1,5):
-        fg = open(f"/root/logGames/log{i}", "r")
+    # games = []
+    # for i in range(1,5):
+    #     fg = open(f"/root/logGames/log{i}", "r")
 
-        line = "\n"
-        win = None
-        states = None
-        while line != "":
-            for i in range(3):
-                line = fg.readline()
-                if line == "":
-                    break
-                if i == 0:
-                    win = int(line.removesuffix("\n"))
-                elif i == 1:
-                    states = ast.literal_eval(line.removesuffix("\n"))
-                    games.append([states, win])
+    #     line = "\n"
+    #     win = None
+    #     states = None
+    #     while line != "":
+    #         for i in range(3):
+    #             line = fg.readline()
+    #             if line == "":
+    #                 break
+    #             if i == 0:
+    #                 win = int(line.removesuffix("\n"))
+    #             elif i == 1:
+    #                 states = ast.literal_eval(line.removesuffix("\n"))
+    #                 games.append([states, win])
 
 
-    for g in games:
-        train(torch.tensor(g[0], dtype=torch.float32), g[1])
-    NeuralNetwork.save(WEIGHTSFILE)
-    open(DONEWEIGHTS, "w").close()
+    # for g in games:
+    #     train(torch.tensor(g[0], dtype=torch.float32), g[1])
+    # NeuralNetwork.save(WEIGHTSFILE)
+    # open(DONEWEIGHTS, "w").close()
 
     moves = playGame()
-    fp = open(FILEPARTIDALARGA, "w")
+    fp = open(f"partida{i}", "w")
     fp.write(movesToGame(moves))
     fp.close()
-    open(DONEPARTIDALARGA, "w").close()
+    # open(DONEPARTIDALARGA, "w").close()
    
