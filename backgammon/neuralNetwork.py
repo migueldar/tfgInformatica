@@ -14,6 +14,8 @@ class BackgammonNN(nn.Module):
         self.layerOut = nn.Linear(64, 1)
 
     def forward(self, x: Tensor) -> Tensor:
+        if x.dim() == 1:
+            x = x.unsqueeze(0)
         x = torch.tanh(self.layer1(x))
         x = torch.tanh(self.layer2(x))
         x = torch.tanh(self.layer3(x))
