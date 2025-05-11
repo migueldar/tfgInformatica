@@ -196,7 +196,7 @@ class MonteTree:
             selected = self.nodeSelection()
             selected.expansion()
             if i == 0:
-                selected.expansion(mul = 8, printtt=True)
+                selected.expansion(mul = 8)
             if len(selected.children) != 0:
                 selected = selected.nodeSelection()
             simVal = selected.simulation()
