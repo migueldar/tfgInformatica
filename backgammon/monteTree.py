@@ -243,6 +243,7 @@ WEIGHTSFILE = sys.argv[4]
 if Path(WEIGHTSFILE).exists():
     print("loading weights")
     NeuralNetwork.load(WEIGHTSFILE)
+    os.remove(WEIGHTSFILE)
 NeuralNetworkQuant = torch.quantization.quantize_dynamic(
     NeuralNetwork, {torch.nn.Linear}, dtype=torch.qint8
 )

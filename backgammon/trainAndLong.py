@@ -272,6 +272,8 @@ while True:
                 elif i == 1:
                     states = ast.literal_eval(line.removesuffix("\n"))
                     games.append([states, win])
+        fg.close()
+        os.remove(f"/root/logGames/log{i}")
 
     for g in games:
         train(torch.tensor(g[0], dtype=torch.float32), g[1])
