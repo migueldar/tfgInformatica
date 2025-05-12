@@ -263,18 +263,19 @@ while True:
         win = None
         states = None
         while line != "":
-            for i in range(3):
+            for j in range(3):
                 line = fg.readline()
                 if line == "":
                     break
-                if i == 0:
+                if j == 0:
                     win = int(line.removesuffix("\n"))
-                elif i == 1:
+                elif j == 1:
                     states = ast.literal_eval(line.removesuffix("\n"))
                     games.append([states, win])
         fg.close()
         os.remove(f"/root/logGames/log{i}")
 
+    print(f"Training with {len(games)} examples")
     for g in games:
         train(torch.tensor(g[0], dtype=torch.float32), g[1])
     NeuralNetwork.save(WEIGHTSFILE)
